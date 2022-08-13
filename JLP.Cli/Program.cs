@@ -8,13 +8,13 @@ namespace JLP.Cli;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         var applicationArgumentRegistry = new ApplicationArgumentRegistry(args[0]);
 
         var host = AppStartup(applicationArgumentRegistry);
 
-        ActivatorUtilities.CreateInstance<CliBootstrap>(host.Services).Start();
+        await ActivatorUtilities.CreateInstance<CliBootstrap>(host.Services).Start();
     }
 
     private static IHost AppStartup(IApplicationArgumentRegistry applicationArgumentRegistry)

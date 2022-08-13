@@ -22,6 +22,7 @@ public static class ConfigureServicesHelperExtensions
                 .AddSingleton<ILogRepository, LogRepository>()
                 .AddSingleton<IErrorService, ErrorService>()
                 .AddSingleton<IErrorRepository, ErrorRepository>()
+                .AddSingleton<ILogDownloaderService, LogDownloaderService>()
             ;
     }
 
