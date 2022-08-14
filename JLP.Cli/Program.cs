@@ -10,7 +10,11 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        var applicationArgumentRegistry = new ApplicationArgumentRegistry(args[0]);
+        var applicationArgumentRegistry = new ApplicationArgumentRegistry(
+            Convert.ToInt32(args[0]),
+            Convert.ToInt32(args[1]),
+            args[2]
+        );
 
         var host = AppStartup(applicationArgumentRegistry);
 

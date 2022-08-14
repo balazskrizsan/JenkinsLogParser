@@ -2,5 +2,7 @@ namespace JLP.Registries;
 
 public interface IApplicationArgumentRegistry
 {
-    string LastLogId { get; }
+    int LastLogId { get; }
+    int Limit { get; }
+    string LogUrl { get; }
 }
