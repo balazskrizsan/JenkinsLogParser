@@ -25,7 +25,7 @@ public class LogDownloaderService : ILogDownloaderService
         this.applicationArgumentRegistry = applicationArgumentRegistry;
     }
 
-    public async Task Download()
+    public async Task<List<LogResponse>> Download()
     {
         var lastLogId = applicationArgumentRegistry.LastLogId;
         var limit = applicationArgumentRegistry.Limit;
@@ -38,7 +38,7 @@ public class LogDownloaderService : ILogDownloaderService
 
             logger.LogInformation($"Downloading from: {url}", url);
 
-            var response = await HttpGet(url);
+            var response = await HttpGet(url, currentId);
 
             logger.LogInformation($"Downloading status: {response.HttpStatusCode}", response.HttpStatusCode);
 
@@ -48,14 +48,14 @@ public class LogDownloaderService : ILogDownloaderService
             }
         }
 
-        var x = logResponses;
+        return logResponses;
     }
 
-    public async Task<LogResponse> HttpGet(string url)
+    public async Task<LogResponse> HttpGet(string url, int currentId)
     {
         HttpResponseMessage response = await client.GetAsync(url);
         var responseBody = await response.Content.ReadAsStringAsync();
 
-        return new LogResponse(responseBody, response.StatusCode);
+        return new LogResponse(currentId, responseBody, response.StatusCode);
     }
 }
