@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JLP.Entities;
 using JLP.Repositories;
+using JLP.ValueObjects;
 
 namespace JLP.Services;
 
@@ -13,8 +14,8 @@ public class ErrorService : IErrorService
         this.errorRepository = errorRepository;
     }
 
-    public void SaveAll(List<Error> errors)
+    public void SaveAll(List<LogError> logErrors)
     {
-        errorRepository.SaveAll(errors);
+        logErrors.ForEach(logError => errorRepository.SaveAll(logError.Errors));
     }
 }

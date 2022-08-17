@@ -6,6 +6,6 @@ namespace JLP.Services;
 
 public interface ILogService
 {
-    List<Log> GetNewLogs();
+    List<Log> SearchUnparsedLogs();
     void SaveAll(List<LogResponse> logs);
 }

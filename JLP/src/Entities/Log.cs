@@ -11,8 +11,8 @@ public class Log
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int? Id { get; set; }
-
-    [Column("raw_log")] public string RawLog { get; set; }
     [Column("log_external_id")] public int LogExternalId { get; set; }
+    [Column("raw_log")] public string RawLog { get; set; }
+    [Column("is_parsed")] public bool IsParsed { get; set; }
     [Column("created_at")] public DateTime CreatedAt { get; set; }
 }

@@ -32,22 +32,24 @@ public class CliBootstrap : ICliBootstrap
 
     public async Task Start()
     {
-        logger.LogInformation("====== Downloading new logs");
+        logger.LogInformation("== Downloading new logs");
 
-        await logDownloaderService.Download();
+        var logResponses = await logDownloaderService.Download();
 
-        logger.LogInformation("====== Loading new logs");
+        logService.SaveAll(logResponses);
+        
+        logger.LogInformation("== Loading new logs");
+        
+        var logs = logService.SearchUnparsedLogs();
+        
+        logger.LogInformation("== Searching for errors");
+        
+        var logErrors = errorFinderService.SearchErrors(logs);
 
-        var logs = logService.getNewLogs();
+        logger.LogInformation("== Saving errors");
+        
+        errorService.SaveAll(logErrors);
 
-        logger.LogInformation("====== Searching for errors");
-
-        var errors = errorFinderService.SearchErrors(logs);
-
-        logger.LogInformation("====== Saving errors");
-
-        errorService.SaveAll(errors);
-
-        logger.LogInformation("====== Successful finish");
+        logger.LogInformation("== Successful finish");
     }
 }

@@ -15,15 +15,16 @@ public class LogRepository : ILogRepository
         this.context = context;
     }
 
-    public List<Log> Search()
+    public List<Log> SearchUnparsedLogs()
     {
-        return context.Logs.Select(l => l).ToList();
+        return context.Logs.Select(l => l).Where(l => !l.IsParsed).ToList();
     }
 
     public void SaveAll(List<LogResponse> logs)
     {
         var mappedLogs = logs.Select(log => new Log
         {
+            IsParsed = false,
             LogExternalId = log.LogExternalId,
             RawLog = log.ResponseBody,
             CreatedAt = DateTime.UtcNow

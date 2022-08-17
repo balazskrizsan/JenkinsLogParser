@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using JLP.Entities;
+using JLP.ValueObjects;
 
 namespace JLP.Services;
 
 public interface IErrorService
 {
-    void SaveAll(List<Error> errors);
+    void SaveAll(List<LogError> logErrors);
 }

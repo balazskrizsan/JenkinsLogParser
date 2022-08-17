@@ -14,9 +14,9 @@ public class LogService : ILogService
         this.logRepository = logRepository;
     }
 
-    public List<Log> GetNewLogs()
+    public List<Log> SearchUnparsedLogs()
     {
-        return logRepository.Search();
+        return logRepository.SearchUnparsedLogs();
     }
 
     public void SaveAll(List<LogResponse> logs)
