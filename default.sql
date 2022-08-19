@@ -16,6 +16,7 @@ create table errors
     message          text,
     error_time       date not null,
     raw_line         text not null,
+    context          text not null,
     constraint errors_pk
         primary key (log_id, line_number)
 );
