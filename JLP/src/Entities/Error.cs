@@ -14,6 +14,7 @@ public class Error
     [Column("message")] public string Message { get; set; }
     [Column("error_time")] public DateTime ErrorTime { get; set; }
     [Column("raw_line")] public string RawLine { get; set; }
+    [Column("context")] public string Context { get; set; }
 
     public Error(
         int logId,
@@ -21,7 +22,8 @@ public class Error
         int errorPatternId,
         string message,
         DateTime errorTime,
-        string rawLine
+        string rawLine,
+        string context
     )
     {
         LogId = logId;
@@ -30,5 +32,6 @@ public class Error
         Message = message;
         ErrorTime = errorTime;
         RawLine = rawLine;
+        Context = context;
     }
 }
