@@ -13,15 +13,28 @@ public class ErrorFinderService : IErrorFinderService
 {
     private ILogger<IErrorFinderService> logger;
 
+    private static string LINE_PARSER =
+        @"\[(?<Date>\d{4}-\d{2}-\d{2})T(?<Time>\d{2}:\d{2}:\d{2}\.\d{1,4})Z\][ ](?<Message>.*)";
+
     public ErrorFinderService(ILogger<IErrorFinderService> logger)
     {
         this.logger = logger;
     }
 
     // Time regex: \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,4}Z\]  
-    private readonly Dictionary<int, Regex> errorPatterns = new()
+    private readonly Dictionary<int, Regex> errorLinePatterns = new()
     {
         { 1, new Regex(@"^[ ]{2}\d{1,3}\)[ ].*") },
+    };
+
+    private readonly Dictionary<int, Dictionary<int, Regex>> errorBrokenTestFilePatterns = new()
+    {
+        {
+            1, new()
+            {
+                { 1, new Regex(@"[  ]\d{1,3}\) (?<FileNameAndPath>[a-zA-Z\/\-\.]*\.(js|ts))") }
+            }
+        }
     };
 
     public List<LogError> SearchErrors(List<Log> logs)
@@ -72,7 +85,7 @@ public class ErrorFinderService : IErrorFinderService
         Dictionary<int, ParsedLine> logLineCollector
     )
     {
-        foreach (var (errorPatternId, errorPattern) in errorPatterns)
+        foreach (var (errorPatternId, errorPattern) in errorLinePatterns)
         {
             if (errorPattern.IsMatch(parsedLine.Message))
             {
@@ -85,10 +98,23 @@ public class ErrorFinderService : IErrorFinderService
                         .Select(l => $"#{l.LineNumber}: [{l.DateTime.ToUniversalTime()}] {l.Message}")
                 );
 
+                errorBrokenTestFilePatterns.TryGetValue(1, out var filePatterns);
+
+                var errorInFile = String.Empty;
+                foreach (var (filePatternId, filePattern) in filePatterns)
+                {
+                    var matches = filePattern.Matches(parsedLine.Message);
+                    if (matches.Count > 0)
+                    {
+                        errorInFile = matches[0].Groups["FileNameAndPath"].Value;
+                    }
+                }
+
                 return new Error(
                     logId,
                     lineNumber,
                     errorPatternId,
+                    errorInFile,
                     parsedLine.Message,
                     parsedLine.DateTime,
                     parsedLine.RawLine,
@@ -102,14 +128,12 @@ public class ErrorFinderService : IErrorFinderService
 
     private ParsedLine ParseLine(string line, int lineNumber)
     {
-        string lineParser = @"\[(?<Date>\d{4}-\d{2}-\d{2})T(?<Time>\d{2}:\d{2}:\d{2}\.\d{1,4})Z\][ ](?<Message>.*)";
-
-        var results = new Regex(lineParser).Matches(line);
+        var matches = new Regex(LINE_PARSER).Matches(line);
 
         var dateTime = DateTime.UtcNow;
         var message = "";
 
-        foreach (Match match in results)
+        foreach (Match match in matches)
         {
             message = match.Groups["Message"].Value;
             dateTime = DateTime.Parse($"{match.Groups["Date"].Value} {match.Groups["Time"].Value}")
