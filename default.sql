@@ -15,7 +15,7 @@ create table errors
     error_pattern_id int  not null,
     error_in_file    text  not null,
     message          text,
-    error_time       date not null,
+    error_time       timestamp not null,
     raw_line         text not null,
     context          text not null,
     constraint errors_pk
