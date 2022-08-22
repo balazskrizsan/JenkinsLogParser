@@ -64,6 +64,7 @@ public class ErrorFinderService : IErrorFinderService
                 var error = GetErrorFromLine(log.Id ?? 0, lineNumber, parsedLine, logLineCollector);
                 if (error != null)
                 {
+                    logger.LogInformation($"     Error in: {error.BrokenTestName}");
                     errors.Add(error);
                 }
             }
@@ -101,12 +102,17 @@ public class ErrorFinderService : IErrorFinderService
                 errorBrokenTestFilePatterns.TryGetValue(1, out var filePatterns);
 
                 var errorInFile = String.Empty;
+                var brokenTestName = String.Empty;
                 foreach (var (filePatternId, filePattern) in filePatterns)
                 {
                     var matches = filePattern.Matches(parsedLine.Message);
                     if (matches.Count > 0)
                     {
                         errorInFile = matches[0].Groups["FileNameAndPath"].Value;
+
+                        brokenTestName = GetFailingTestName(parsedLine.LineNumber, logLineCollector);
+
+                        break;
                     }
                 }
 
@@ -115,6 +121,7 @@ public class ErrorFinderService : IErrorFinderService
                     lineNumber,
                     errorPatternId,
                     errorInFile,
+                    brokenTestName,
                     parsedLine.Message,
                     parsedLine.DateTime,
                     parsedLine.RawLine,
@@ -124,6 +131,43 @@ public class ErrorFinderService : IErrorFinderService
         }
 
         return null;
+    }
+
+    private string GetFailingTestName(int currentErrorNameLine, Dictionary<int, ParsedLine> logLineCollector)
+    {
+        var i = 1;
+        var testName = String.Empty;
+        var tabSpace = 2;
+        var expectedTabs = 3;
+
+        while (true)
+        {
+            var currentMessage = logLineCollector[currentErrorNameLine + i].Message; 
+            var leftTabs = currentMessage.TakeWhile(c => c == ' ').Count() / tabSpace;
+
+            if (leftTabs != expectedTabs)
+            {
+                break;
+            }
+
+            if (i > 1)
+            {
+                testName += " => ";
+            }
+            testName += currentMessage.Trim();
+
+            expectedTabs++;
+            i++;
+            if (i > 5)
+            {
+                testName = "N/A";
+                logger.LogError($"Test name parsing error with: {logLineCollector[currentErrorNameLine + i]}");
+
+                break;
+            }
+        }
+
+        return testName;
     }
 
     private ParsedLine ParseLine(string line, int lineNumber)

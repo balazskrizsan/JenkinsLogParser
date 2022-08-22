@@ -10,8 +10,9 @@ public class Error
 {
     [Column("log_id")] public int LogId { get; set; }
     [Column("line_number")] public int LineNumber { get; set; }
-    [Column("error_in_file")] public string ErrorInFile { get; set; }
     [Column("error_pattern_id")] public int ErrorPatternId { get; set; }
+    [Column("error_in_file")] public string ErrorInFile { get; set; }
+    [Column("broken_test_name")] public string BrokenTestName { get; set; }
     [Column("message")] public string Message { get; set; }
     [Column("error_time")] public DateTime ErrorTime { get; set; }
     [Column("raw_line")] public string RawLine { get; set; }
@@ -22,6 +23,7 @@ public class Error
         int lineNumber,
         int errorPatternId,
         string errorInFile,
+        string brokenTestName,
         string message,
         DateTime errorTime,
         string rawLine,
@@ -30,8 +32,9 @@ public class Error
     {
         LogId = logId;
         LineNumber = lineNumber;
-        ErrorInFile = errorInFile;
         ErrorPatternId = errorPatternId;
+        ErrorInFile = errorInFile;
+        BrokenTestName = brokenTestName;
         Message = message;
         ErrorTime = errorTime;
         RawLine = rawLine;

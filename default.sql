@@ -14,6 +14,7 @@ create table errors
     line_number      int  not null,
     error_pattern_id int  not null,
     error_in_file    text  not null,
+    broken_test_name text  not null,
     message          text,
     error_time       timestamp not null,
     raw_line         text not null,
