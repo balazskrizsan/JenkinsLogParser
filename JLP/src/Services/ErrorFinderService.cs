@@ -16,6 +16,8 @@ public class ErrorFinderService : IErrorFinderService
     private static string LINE_PARSER =
         @"\[(?<Date>\d{4}-\d{2}-\d{2})T(?<Time>\d{2}:\d{2}:\d{2}\.\d{1,4})Z\][ ](?<Message>.*)";
 
+    private static int ERROR_NAME_MAX_LINES = 5;
+    
     public ErrorFinderService(ILogger<IErrorFinderService> logger)
     {
         this.logger = logger;
@@ -135,12 +137,12 @@ public class ErrorFinderService : IErrorFinderService
 
     private string GetFailingTestName(int currentErrorNameLine, Dictionary<int, ParsedLine> logLineCollector)
     {
-        var i = 1;
         var testName = String.Empty;
         var tabSpace = 2;
         var expectedTabs = 3;
 
-        while (true)
+        int i;
+        for (i = 1; i < ERROR_NAME_MAX_LINES; i++)
         {
             var currentMessage = logLineCollector[currentErrorNameLine + i].Message; 
             var leftTabs = currentMessage.TakeWhile(c => c == ' ').Count() / tabSpace;
@@ -157,14 +159,13 @@ public class ErrorFinderService : IErrorFinderService
             testName += currentMessage.Trim();
 
             expectedTabs++;
-            i++;
-            if (i > 5)
-            {
-                testName = "N/A";
-                logger.LogError($"Test name parsing error with: {logLineCollector[currentErrorNameLine + i]}");
+        }
 
-                break;
-            }
+        if (i == ERROR_NAME_MAX_LINES)
+        {
+            logger.LogError($"Test name parsing error with: {logLineCollector[currentErrorNameLine + i]}");
+
+            return "N/A";
         }
 
         return testName;
