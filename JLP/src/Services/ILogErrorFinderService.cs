@@ -4,7 +4,7 @@ using JLP.ValueObjects;
 
 namespace JLP.Services;
 
-public interface IErrorFinderService
+public interface ILogErrorFinderService
 {
     public List<LogError> SearchErrors(List<Log> logs);
 }

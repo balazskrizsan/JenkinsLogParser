@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using JLP.Entities;
@@ -9,27 +8,19 @@ using Microsoft.Extensions.Logging;
 
 namespace JLP.Services;
 
-public class ErrorFinderService : IErrorFinderService
+public class LineErrorFinderService : ILineErrorFinderService
 {
-    private ILogger<IErrorFinderService> logger;
-
     private static string LINE_PARSER =
         @"\[(?<Date>\d{4}-\d{2}-\d{2})T(?<Time>\d{2}:\d{2}:\d{2}\.\d{1,4})Z\][ ](?<Message>.*)";
 
     private static int ERROR_NAME_MAX_LINES = 5;
-    
-    public ErrorFinderService(ILogger<IErrorFinderService> logger)
-    {
-        this.logger = logger;
-    }
 
-    // Time regex: \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,4}Z\]  
-    private readonly Dictionary<int, Regex> errorLinePatterns = new()
+    private static readonly Dictionary<int, Regex> ERROR_LINE_PATTERNS = new()
     {
         { 1, new Regex(@"^[ ]{2}\d{1,3}\)[ ].*") },
     };
 
-    private readonly Dictionary<int, Dictionary<int, Regex>> errorBrokenTestFilePatterns = new()
+    private readonly Dictionary<int, Dictionary<int, Regex>> BROKEN_TEST_FILES_PATTERNS = new()
     {
         {
             1, new()
@@ -39,56 +30,21 @@ public class ErrorFinderService : IErrorFinderService
         }
     };
 
-    public List<LogError> SearchErrors(List<Log> logs)
+    private ILogger<LineErrorFinderService> logger;
+
+    public LineErrorFinderService(ILogger<LineErrorFinderService> logger)
     {
-        var logErrors = new List<LogError>();
-
-        logs.ForEach(log =>
-        {
-            var errors = new List<Error>();
-            Dictionary<int, ParsedLine> logLineCollector = new();
-
-            using (var reader = new StringReader(log.RawLog))
-            {
-                logger.LogInformation($"==== Parse lines in xidf#{log.LogExternalId}");
-
-                var lineNumber = 0;
-
-                for (var line = reader.ReadLine(); line != null; line = reader.ReadLine(), lineNumber++)
-                {
-                    var parsedLine = ParseLine(line, lineNumber);
-                    logLineCollector.Add(parsedLine.LineNumber, parsedLine);
-                }
-            }
-
-            foreach (var (lineNumber, parsedLine) in logLineCollector)
-            {
-                var error = GetErrorFromLine(log.Id ?? 0, lineNumber, parsedLine, logLineCollector);
-                if (error != null)
-                {
-                    logger.LogInformation($"     Error in: {error.BrokenTestName}");
-                    errors.Add(error);
-                }
-            }
-
-            logger.LogInformation($"     Found errors: {errors.Count}");
-            logger.LogInformation($"     First message: {logLineCollector[0].RawLine}");
-            logger.LogInformation($"     Last message: {logLineCollector.Values.Last().RawLine}");
-
-            logErrors.Add(new LogError(errors.Count > 0, errors));
-        });
-
-        return logErrors;
+        this.logger = logger;
     }
 
-    private Error GetErrorFromLine(
+    public Error GetErrorFromLine(
         int logId,
         int lineNumber,
         ParsedLine parsedLine,
         Dictionary<int, ParsedLine> logLineCollector
     )
     {
-        foreach (var (errorPatternId, errorPattern) in errorLinePatterns)
+        foreach (var (errorPatternId, errorPattern) in ERROR_LINE_PATTERNS)
         {
             if (errorPattern.IsMatch(parsedLine.Message))
             {
@@ -101,7 +57,7 @@ public class ErrorFinderService : IErrorFinderService
                         .Select(l => $"#{l.LineNumber}: [{l.DateTime.ToUniversalTime()}] {l.Message}")
                 );
 
-                errorBrokenTestFilePatterns.TryGetValue(1, out var filePatterns);
+                BROKEN_TEST_FILES_PATTERNS.TryGetValue(1, out var filePatterns);
 
                 var errorInFile = String.Empty;
                 var brokenTestName = String.Empty;
@@ -144,7 +100,7 @@ public class ErrorFinderService : IErrorFinderService
         int i;
         for (i = 1; i < ERROR_NAME_MAX_LINES; i++)
         {
-            var currentMessage = logLineCollector[currentErrorNameLine + i].Message; 
+            var currentMessage = logLineCollector[currentErrorNameLine + i].Message;
             var leftTabs = currentMessage.TakeWhile(c => c == ' ').Count() / tabSpace;
 
             if (leftTabs != expectedTabs)
@@ -156,6 +112,7 @@ public class ErrorFinderService : IErrorFinderService
             {
                 testName += " => ";
             }
+
             testName += currentMessage.Trim();
 
             expectedTabs++;
@@ -169,22 +126,5 @@ public class ErrorFinderService : IErrorFinderService
         }
 
         return testName;
-    }
-
-    private ParsedLine ParseLine(string line, int lineNumber)
-    {
-        var matches = new Regex(LINE_PARSER).Matches(line);
-
-        var dateTime = DateTime.UtcNow;
-        var message = "";
-
-        foreach (Match match in matches)
-        {
-            message = match.Groups["Message"].Value;
-            dateTime = DateTime.Parse($"{match.Groups["Date"].Value} {match.Groups["Time"].Value}")
-                .ToUniversalTime();
-        }
-
-        return new ParsedLine(line, lineNumber, message, dateTime);
     }
 }

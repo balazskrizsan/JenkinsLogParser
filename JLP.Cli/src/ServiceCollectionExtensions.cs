@@ -17,7 +17,8 @@ public static class ConfigureServicesHelperExtensions
         return serviceCollection
                 .AddLogging()
                 .AddSingleton(_ => applicationArgumentRegistry)
-                .AddSingleton<IErrorFinderService, ErrorFinderService>()
+                .AddSingleton<ILogErrorFinderService, LogErrorFinderService>()
+                .AddSingleton<ILineErrorFinderService, LineErrorFinderService>()
                 .AddSingleton<ILogService, LogService>()
                 .AddSingleton<ILogRepository, LogRepository>()
                 .AddSingleton<IErrorService, ErrorService>()
