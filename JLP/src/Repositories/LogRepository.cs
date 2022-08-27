@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using JLP.Entities;
-using JLP.ValueObjects;
 
 namespace JLP.Repositories;
 
@@ -20,21 +18,13 @@ public class LogRepository : ILogRepository
         return context.Logs.Select(l => l).Where(l => !l.IsParsed).ToList();
     }
 
-    public void SaveAll(List<LogResponse> logs)
+    public void SaveAll(IEnumerable<Log> logs)
     {
-        var mappedLogs = logs.Select(log => new Log
-        {
-            IsParsed = false,
-            LogExternalId = log.LogExternalId,
-            RawLog = log.ResponseBody,
-            CreatedAt = DateTime.UtcNow
-        });
-
-        context.Logs.AddRange(mappedLogs);
+        context.Logs.AddRange(logs);
         context.SaveChanges();
     }
 
-    public void MarkAllParsed(List<int?> logIds)
+    public void MarkAllParsed(IEnumerable<int?> logIds)
     {
         context.Logs
             .Where(l => logIds.Contains(l.Id))

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JLP.Entities;
@@ -22,7 +23,15 @@ public class LogService : ILogService
 
     public void SaveAll(List<LogResponse> logs)
     {
-        logRepository.SaveAll(logs);
+        var mappedLogs = logs.Select(log => new Log
+        {
+            IsParsed = false,
+            LogExternalId = log.LogExternalId,
+            RawLog = log.ResponseBody,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        logRepository.SaveAll(mappedLogs);
     }
 
     public void MarkAllParsed(List<Log> logs)
