@@ -33,4 +33,14 @@ public class LogRepository : ILogRepository
         context.Logs.AddRange(mappedLogs);
         context.SaveChanges();
     }
+
+    public void MarkAllParsed(List<int?> logIds)
+    {
+        context.Logs
+            .Where(l => logIds.Contains(l.Id))
+            .ToList()
+            .ForEach(l => l.IsParsed = true);
+
+        context.SaveChanges();
+    }
 }

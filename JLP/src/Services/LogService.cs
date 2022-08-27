@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using JLP.Entities;
 using JLP.Repositories;
 using JLP.ValueObjects;
@@ -22,5 +23,10 @@ public class LogService : ILogService
     public void SaveAll(List<LogResponse> logs)
     {
         logRepository.SaveAll(logs);
+    }
+
+    public void MarkAllParsed(List<Log> logs)
+    {
+        logRepository.MarkAllParsed(logs.Select(l => l.Id).ToList());
     }
 }

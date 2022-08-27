@@ -6,6 +6,7 @@ namespace JLP.Repositories;
 
 public interface ILogRepository
 {
-    public List<Log> SearchUnparsedLogs();
-    public void SaveAll(List<LogResponse> logs);
+    List<Log> SearchUnparsedLogs();
+    void SaveAll(List<LogResponse> logs);
+    void MarkAllParsed(List<int?> logIds);
 }
