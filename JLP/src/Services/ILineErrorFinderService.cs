@@ -6,7 +6,7 @@ namespace JLP.Services;
 
 public interface ILineErrorFinderService
 {
-    Error GetErrorFromLine(
+    Error SearchError(
         int logId,
         int lineNumber,
         ParsedLine parsedLine,

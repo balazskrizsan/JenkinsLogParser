@@ -37,7 +37,7 @@ public class LineErrorFinderService : ILineErrorFinderService
         this.logger = logger;
     }
 
-    public Error GetErrorFromLine(
+    public Error SearchError(
         int logId,
         int lineNumber,
         ParsedLine parsedLine,

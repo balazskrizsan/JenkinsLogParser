@@ -50,7 +50,7 @@ public class LogErrorFinderService : ILogErrorFinderService
 
             foreach (var (lineNumber, parsedLine) in logLineCollector)
             {
-                var error = lineErrorFinderService.GetErrorFromLine(log.Id ?? 0, lineNumber, parsedLine, logLineCollector);
+                var error = lineErrorFinderService.SearchError(log.Id ?? 0, lineNumber, parsedLine, logLineCollector);
                 if (error != null)
                 {
                     logger.LogInformation($"     Error in: {error.BrokenTestName}");
