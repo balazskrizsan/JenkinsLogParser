@@ -37,7 +37,7 @@ public class LogErrorFinderService : ILogErrorFinderService
 
             using (var reader = new StringReader(log.RawLog))
             {
-                logger.LogInformation($"==== Parse lines in xidf#{log.LogExternalId}");
+                logger.LogInformation($"==== Parse lines in xid#{log.LogExternalId}");
 
                 var lineNumber = 0;
 
