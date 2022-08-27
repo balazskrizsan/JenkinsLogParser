@@ -10,9 +10,6 @@ namespace JLP.Services;
 
 public class LineErrorFinderService : ILineErrorFinderService
 {
-    private static string LINE_PARSER =
-        @"\[(?<Date>\d{4}-\d{2}-\d{2})T(?<Time>\d{2}:\d{2}:\d{2}\.\d{1,4})Z\][ ](?<Message>.*)";
-
     private static int ERROR_NAME_MAX_LINES = 5;
 
     private static readonly Dictionary<int, Regex> ERROR_LINE_PATTERNS = new()
