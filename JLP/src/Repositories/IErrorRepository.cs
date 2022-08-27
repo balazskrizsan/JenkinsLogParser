@@ -5,5 +5,5 @@ namespace JLP.Repositories;
 
 public interface IErrorRepository
 {
-    public void SaveAll(List<Error> errors);
+    public void SaveAll(IEnumerable<Error> errors);
 }

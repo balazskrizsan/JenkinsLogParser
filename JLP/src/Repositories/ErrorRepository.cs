@@ -12,7 +12,7 @@ public class ErrorRepository : IErrorRepository
         this.context = context;
     }
 
-    public void SaveAll(List<Error> errors)
+    public void SaveAll(IEnumerable<Error> errors)
     {
         context.Errors.AddRange(errors);
         context.SaveChanges();
