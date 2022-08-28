@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JLP.Entities;
+using JLP.Registries;
 using JLP.Repositories;
 using JLP.ValueObjects;
 
@@ -10,10 +11,15 @@ namespace JLP.Services;
 public class LogService : ILogService
 {
     private readonly ILogRepository logRepository;
+    private readonly IApplicationArgumentRegistry applicationArgumentRegistry;
 
-    public LogService(ILogRepository logRepository)
+    public LogService(
+        ILogRepository logRepository,
+        IApplicationArgumentRegistry applicationArgumentRegistry
+    )
     {
         this.logRepository = logRepository;
+        this.applicationArgumentRegistry = applicationArgumentRegistry;
     }
 
     public List<Log> SearchUnparsedLogs()
@@ -37,5 +43,10 @@ public class LogService : ILogService
     public void MarkAllParsed(List<Log> logs)
     {
         logRepository.MarkAllParsed(logs.Select(l => l.Id).ToList());
+    }
+
+    public IEnumerable<int> GetExistingExternalIds(IEnumerable<int> externalIds)
+    {
+        return logRepository.GetExistingExternalIds(externalIds);
     }
 }

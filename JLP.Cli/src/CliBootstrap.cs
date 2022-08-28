@@ -32,15 +32,18 @@ public class CliBootstrap : ICliBootstrap
 
     public async Task Start()
     {
-        logger.LogInformation("== Downloading new logs");
-        var logResponses = await logDownloaderService.Download();
+        logger.LogInformation($"== Listing the new external ids from the CLI parameters");
+        var externalIdsToDownload = logDownloaderService.CalculateNewExternalIds().ToList();
+
+        logger.LogInformation($"== Downloading new logs; count: {externalIdsToDownload.Count}");
+        var logResponses = await logDownloaderService.Download(externalIdsToDownload);
 
         logger.LogInformation($"== Saving new logs; count {logResponses.Count}");
         logService.SaveAll(logResponses);
-        
+
         logger.LogInformation("== Loading new logs");
         var logs = logService.SearchUnparsedLogs();
-        
+
         logger.LogInformation($"== Searching for errors; count: {logs.Count}");
         var logErrors = logErrorFinderService.SearchErrors(logs);
 
@@ -49,7 +52,7 @@ public class CliBootstrap : ICliBootstrap
 
         logger.LogInformation($"== Mark logs parsed; count: {logs.Count}");
         logService.MarkAllParsed(logs);
-        
+
         logger.LogInformation("== Successful finish");
     }
 }

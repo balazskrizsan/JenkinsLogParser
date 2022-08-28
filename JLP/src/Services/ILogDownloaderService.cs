@@ -6,5 +6,6 @@ namespace JLP.Services;
 
 public interface ILogDownloaderService
 {
-    public Task<List<LogResponse>> Download();
+    public IEnumerable<int> CalculateNewExternalIds();
+    Task<List<LogResponse>> Download(IEnumerable<int> externalIds);
 }

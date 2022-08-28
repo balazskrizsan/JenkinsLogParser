@@ -26,11 +26,21 @@ public class LogRepository : ILogRepository
 
     public void MarkAllParsed(IEnumerable<int?> logIds)
     {
-        context.Logs
+        context
+            .Logs
             .Where(l => logIds.Contains(l.Id))
             .ToList()
             .ForEach(l => l.IsParsed = true);
 
         context.SaveChanges();
+    }
+
+    public List<int> GetExistingExternalIds(IEnumerable<int> externalIds)
+    {
+        return context
+            .Logs
+            .Select(l => l.LogExternalId)
+            .Where(externalId => externalIds.Cast<int?>().ToList().Contains(externalId))
+            .ToList();
     }
 }
